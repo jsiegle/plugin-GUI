@@ -307,10 +307,20 @@ void FileReader::updateSettings()
 {
      if (!input) return;
 
+     MetaDataDescriptor descriptor = MetaDataDescriptor(MetaDataDescriptor::FLOAT, 1, "Depth", "Channel depth", "depth-value");
+     MetaDataValue depthValue = MetaDataValue(MetaDataDescriptor::FLOAT, 1);
+
+     MetaDataDescriptor descriptor2 = MetaDataDescriptor(MetaDataDescriptor::CHAR, 64, "Name", "Subprocessor name", "subprocessor-name");
+     MetaDataValue subprocessorName = MetaDataValue(MetaDataDescriptor::CHAR, 64);
+     subprocessorName.setValue("MySubprocessor");
+
      for (int i=0; i < currentNumChannels; i++)
      {
          dataChannelArray[i]->setBitVolts(channelInfo[i].bitVolts);
          dataChannelArray[i]->setName(channelInfo[i].name);
+         depthValue.setValue(float(i));
+         dataChannelArray[i]->addMetaData(descriptor, depthValue);
+         dataChannelArray[i]->addMetaData(descriptor2, subprocessorName);
      }
 }
 

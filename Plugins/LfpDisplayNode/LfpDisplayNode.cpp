@@ -79,6 +79,29 @@ void LfpDisplayNode::updateSettings()
         numChannelsInSubprocessor[channelSubprocessor]++;
 
         subprocessorSampleRate.insert({ channelSubprocessor, getDataChannel(i)->getSampleRate() });
+
+        int depthId = getDataChannel(i)->findMetaData(MetaDataDescriptor::FLOAT, 1, "depth-value");
+        int subprocessorNameId = getDataChannel(i)->findMetaData(MetaDataDescriptor::CHAR, 32, "subprocessor-name");
+
+        if (depthId > -1)
+        {
+            const MetaDataValue* val = getDataChannel(i)->getMetaDataValue(depthId);
+            float floatValue;
+            val->getValue(&floatValue);
+
+            std::cout << "Channel depth: " << floatValue << std::endl;
+            
+        }
+
+        if (subprocessorNameId > -1)
+        {
+            const MetaDataValue* val = getDataChannel(i)->getMetaDataValue(subprocessorNameId);
+            String stringValue;
+            val->getValue(stringValue);
+
+            std::cout << "Subprocessor name: " << stringValue << "END" << std::endl;
+
+        }
     }
     
     numSubprocessors = numChannelsInSubprocessor.size();
