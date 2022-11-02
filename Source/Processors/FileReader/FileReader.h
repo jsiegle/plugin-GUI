@@ -37,6 +37,29 @@
 #define BUFFER_WINDOW_CACHE_SIZE 10
 
 
+class FileReader;
+
+class FileReaderTest : public UnitTest
+{
+public:
+    /** Constructor*/
+    FileReaderTest() : UnitTest("File Reader Testing", "Plugins") {}
+
+    /** Add pointer to File Reader to test */
+    void setFileReader(FileReader* fr) { fileReaders.add(fr); }
+
+    /** Remove pointer to File Reader when it's deleted */
+    void removeFileReader(FileReader* fr) { fileReaders.removeFirstMatchingValue(fr); }
+
+    /** Run the test */
+    void runTest();
+
+private:
+
+    Array<FileReader*> fileReaders;
+
+};
+
 /**
   Reads data from a file.
 
@@ -135,6 +158,9 @@ public:
     /** Converts milliseconds to samples using current stream's sample rate */
     int64 millisecondsToSamples (unsigned int ms) const;
 
+    /** Test object*/
+    static FileReaderTest test;
+
 private:
 
     /** Currently only support one event channel per stream */
@@ -199,8 +225,11 @@ private:
     /** Returns a new FileSource object for a given file source */
 	FileSource* createBuiltInFileSource(int index) const;
 
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileReader);
 };
+
 
 
 #endif  // __FILEREADER_H_B327D3D2__

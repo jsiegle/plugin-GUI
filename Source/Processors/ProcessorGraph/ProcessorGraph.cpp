@@ -305,6 +305,19 @@ GenericProcessor* ProcessorGraph::createProcessor(Plugin::Description& descripti
         updateViews(addedProc);
     }
 
+    //std::cout << "Running tests." << std::endl;
+
+    if (!signalChainIsLoading)
+    {
+        UnitTestRunner runner;
+
+        runner.setAssertOnFailure(true);
+
+        runner.runTestsInCategory("Plugins");
+    }
+    
+    //std::cout << "Finished." << std::endl;
+
     return addedProc;
 }
 

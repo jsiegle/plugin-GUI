@@ -35,6 +35,28 @@
 
 #include "../Events/Event.h"
 
+void FileReaderTest::runTest()
+{
+    if (fileReaders.size() > 0)
+    {
+        for (auto fileReader : fileReaders)
+        {
+            String nodeId = String(fileReader->getNodeId());
+            
+            beginTest("File Reader " + nodeId + ": Supported File Types");
+            expect(fileReader->isFileSupported("test.oebin"), "Binary format not supported");
+            expect(fileReader->isFileSupported("test.openephys"), "Open Ephys format not supported");
+            expect(fileReader->isFileSupported("test.nwb"), "NWB format not supported");
+        }
+        
+    } else {
+        std::cout << "No File Readers found." << std::endl;
+    }
+    
+}
+
+FileReaderTest FileReader::test = FileReaderTest();
+
 FileReader::FileReader() : GenericProcessor ("File Reader")
     , Thread ("filereader_Async_Reader")
     , totalSamplesAcquired      (0)
@@ -57,6 +79,8 @@ FileReader::FileReader() : GenericProcessor ("File Reader")
 
 	/* Load any plugin file sources */
     const int numFileSources = AccessClass::getPluginManager()->getNumFileSources();
+
+    test.setFileReader(this);
 
     LOGD("Found ", numFileSources, " File Source plugins.");
 
@@ -108,6 +132,7 @@ FileReader::FileReader() : GenericProcessor ("File Reader")
 
 FileReader::~FileReader()
 {
+    test.removeFileReader(this);
     signalThreadShouldExit();
     notify();
 }
@@ -123,7 +148,7 @@ AudioProcessorEditor* FileReader::createEditor()
 void FileReader::initialize(bool signalChainIsLoading)
 {
 
-    LOGD("INITIALIZING FILE READER");
+    LOGC("INITIALIZING FILE READER");
 
     if (signalChainIsLoading)
         return;
@@ -131,7 +156,7 @@ void FileReader::initialize(bool signalChainIsLoading)
     if (isEnabled)
         return;
 
-    LOGD("SETTING FILE");
+    LOGC("SETTING FILE");
 
     File executable = File::getSpecialLocation(File::currentApplicationFile);
 #ifdef __APPLE__
