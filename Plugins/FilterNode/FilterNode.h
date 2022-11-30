@@ -55,6 +55,21 @@ public:
 
 };
 
+/** Allows multi-threaded filtering */
+class FilterJob : public ThreadPoolJob
+{
+public:
+    FilterJob(String name, Dsp::Filter* filter, float* channelPointer, int numSamples);
+
+    JobStatus runJob();
+
+private:
+
+    Dsp::Filter* filter;
+    float* channelPointer;
+    int numSamples;
+};
+
 /**
     Filters data using a filter from the DSP library.
 
@@ -89,6 +104,8 @@ private:
     StreamSettings<BandpassFilterSettings> settings;
 
     void setFilterParameters (double, double, int);
+
+    ThreadPool threadPool;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterNode);
 };
