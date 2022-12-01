@@ -27,6 +27,8 @@
 
 #include <DspLib.h>
 
+#define CHANNELS_PER_THREAD 64
+
 
 /** Holds settings for one stream's filters*/
 
@@ -59,15 +61,16 @@ public:
 class FilterJob : public ThreadPoolJob
 {
 public:
-    FilterJob(String name, Dsp::Filter* filter, float* channelPointer, int numSamples);
+    FilterJob(String name, Array<Dsp::Filter*> filters, Array<float*> channelPointer, int numSamples);
 
     JobStatus runJob();
 
 private:
 
-    Dsp::Filter* filter;
-    float* channelPointer;
+    Array<Dsp::Filter*> filters;
+    Array<float*> channelPointers;
     int numSamples;
+    int numChannels;
 };
 
 /**

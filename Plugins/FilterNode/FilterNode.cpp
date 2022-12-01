@@ -64,18 +64,24 @@ void BandpassFilterSettings::setFilterParameters(double lowCut, double highCut, 
     filters[channel]->setParams(params);
 }
 
-FilterJob::FilterJob(String name, Dsp::Filter* filter_, float* channelPointer_, int numSamples_)
+FilterJob::FilterJob(String name, Array<Dsp::Filter*> filters_, Array<float*> channelPointers_, int numSamples_)
     : ThreadPoolJob(name),
-      filter(filter_),
-      channelPointer(channelPointer_),
-      numSamples(numSamples_)
+      filters(filters_),
+      channelPointers(channelPointers_),
+      numSamples(numSamples_),
+      numChannels(channelPointers_.size())
 {
 
 }
 
 ThreadPoolJob::JobStatus FilterJob::runJob()
 {
-    filter->process(numSamples, &channelPointer);
+    for (int i = 0; i < numChannels; i++)
+    {
+        float* ptr = channelPointers[i];
+        filters[i]->process(numSamples, &ptr);
+    }
+        
 
     return ThreadPoolJob::jobHasFinished;
 }
@@ -223,19 +229,37 @@ void FilterNode::process (AudioBuffer<float>& buffer)
             const uint32 numSamples = getNumSamplesInBlock(streamId);
 
             int i = 0;
+            Array<float*> channelPointers;
+            Array<Dsp::Filter*> filters;
 
             for (auto localChannelIndex : *((*stream)["Channels"].getArray()))
             {
                 int globalChannelIndex = getGlobalChannelIndex(stream->getStreamId(), (int) localChannelIndex);
 
-                float* ptr = buffer.getWritePointer(globalChannelIndex);
+                channelPointers.add(buffer.getWritePointer(globalChannelIndex));
+                filters.add(streamSettings->filters[localChannelIndex]);
+                i++;
 
+                if (i % CHANNELS_PER_THREAD == 0)
+                {
+                    String jobName = String(streamId) + "_" + String(i++);
+
+                    FilterJob* job = new FilterJob(jobName, filters, channelPointers, numSamples);
+
+                    threadPool.addJob(job, true);
+
+                    channelPointers.clear();
+                    filters.clear();
+                }
+            }
+
+            if (channelPointers.size() > 0)
+            {
                 String jobName = String(streamId) + "_" + String(i++);
 
-                FilterJob* job = new FilterJob(jobName, streamSettings->filters[localChannelIndex], ptr, numSamples);
+                FilterJob* job = new FilterJob(jobName, filters, channelPointers, numSamples);
 
                 threadPool.addJob(job, true);
-
             }
         }
     }
