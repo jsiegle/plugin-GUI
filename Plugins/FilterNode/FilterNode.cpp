@@ -88,7 +88,7 @@ ThreadPoolJob::JobStatus FilterJob::runJob()
 
 
 FilterNode::FilterNode()
-    : GenericProcessor  ("Bandpass Filter"), threadPool(8)
+    : GenericProcessor  ("Bandpass Filter")
 {
 
     addFloatParameter(Parameter::STREAM_SCOPE, "high_cut", "Filter high cut", 6000, 0.1, 15000, false);

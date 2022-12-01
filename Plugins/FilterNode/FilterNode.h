@@ -27,7 +27,7 @@
 
 #include <DspLib.h>
 
-#define CHANNELS_PER_THREAD 64
+#define CHANNELS_PER_THREAD 32
 
 
 /** Holds settings for one stream's filters*/
